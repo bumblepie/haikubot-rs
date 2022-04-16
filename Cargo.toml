@@ -7,8 +7,16 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-serenity ={ version = "0.9", features = ["collector"] }
-tokio = { version = "0.2", features = ["macros"] }
+serenity = { version = "0.10", default-features = false, features = [
+    "cache",
+    "client",
+    "collector",
+    "gateway",
+    "rustls_backend",
+    "model",
+    "unstable_discord_api",
+] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 regex = "1"
 cached = "0.22"
 lazy_static = "1"
@@ -16,3 +24,6 @@ chrono = "0.4"
 diesel = { version = "1", features = ["postgres", "chrono"] }
 rand = "0.7"
 diesel_full_text_search = "1"
+dashmap = "5.2"
+slash-helper = { git = "https://github.com/bumblepie/slash-helper.git" }
+slash-helper-macros = { git = "https://github.com/bumblepie/slash-helper.git" }
