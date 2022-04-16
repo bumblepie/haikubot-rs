@@ -11,8 +11,7 @@ pub mod schema;
 use chrono::{DateTime, Utc};
 use commands::{
     count::CountCommand, gethaiku::GetHaikuCommand, random::RandomHaikuCommand,
-    search::SearchCommand, test::TestCommand, test_sub::TestSubCommands, uptime::UptimeCommand,
-    Commands,
+    search::SearchCommand, uptime::UptimeCommand, Commands,
 };
 use counting::{is_haiku, is_haiku_single};
 use dashmap::DashMap;
@@ -28,10 +27,8 @@ use serenity::{
     Client,
 };
 use slash_helper::{register_commands, MessageComponentInteractionHandler};
-use std::env;
+use std::env::{self, VarError};
 use std::{collections::HashMap, sync::Arc};
-
-use crate::commands::test_sub_groups::TestSubCommandGroups;
 
 struct HaikuTracker;
 impl TypeMapKey for HaikuTracker {
@@ -120,23 +117,6 @@ async fn on_haiku_line(ctx: &Context, channel: ChannelId, line: HaikuLine) {
     }
 }
 
-// #[help]
-// async fn my_help(
-//     context: &Context,
-//     msg: &Message,
-//     args: Args,
-//     help_options: &'static HelpOptions,
-//     groups: &[&'static CommandGroup],
-//     owners: HashSet<UserId>,
-// ) -> CommandResult {
-//     let _ = help_commands::with_embeds(context, msg, args, help_options, groups, owners).await;
-//     Ok(())
-// }
-
-// #[group]
-// #[commands(count, get, random, search, uptime)]
-// struct General;
-
 struct Handler;
 
 #[async_trait]
@@ -174,29 +154,35 @@ impl EventHandler for Handler {
 
     async fn ready(&self, ctx: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
-        let guild_id = env::var("TEST_GUILD_ID")
-            .expect("Expected a test guild id in the environment")
-            .parse()
-            .map(|id| GuildId(id))
-            .expect("Invalid test guild id id");
+        let guild_id = env::var("TEST_GUILD_ID").map(|id| {
+            id.parse()
+                .map(|id| GuildId(id))
+                .expect("Invalid test guild id id")
+        });
+        let guild_id = match guild_id {
+            Ok(id) => Some(id),
+            Err(VarError::NotPresent) => None,
+            _ => panic!("Invalid guild id provided at $TEST_GUILD_ID"),
+        };
         let commands = register_commands!(
             &ctx,
-            Some(guild_id),
+            guild_id,
             [
                 UptimeCommand,
                 CountCommand,
                 GetHaikuCommand,
                 RandomHaikuCommand,
-                SearchCommand,
-                TestCommand,
-                TestSubCommands,
-                TestSubCommandGroups
+                SearchCommand
             ]
         )
         .expect("Unable to register commands");
         println!(
-            "I now have the following guild slash commands: {:#?}",
-            commands
+            "Registered {} commands {}",
+            commands.len(),
+            match guild_id {
+                Some(id) => format!("for guild_id: {}", id),
+                None => "globally".to_owned(),
+            },
         );
     }
 
