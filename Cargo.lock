@@ -1135,6 +1135,7 @@ checksum = "eb703cfe953bccee95685111adeedb76fabe4e97549a58d16f03ea7b9367bb32"
 [[package]]
 name = "slash-helper"
 version = "0.1.0"
+source = "git+https://github.com/bumblepie/slash-helper.git#be769a64df5a72958b0e112e29c0556382aa58ca"
 dependencies = [
  "serenity",
 ]
@@ -1142,6 +1143,7 @@ dependencies = [
 [[package]]
 name = "slash-helper-macros"
 version = "0.1.0"
+source = "git+https://github.com/bumblepie/slash-helper.git#be769a64df5a72958b0e112e29c0556382aa58ca"
 dependencies = [
  "itertools",
  "proc-macro2",
