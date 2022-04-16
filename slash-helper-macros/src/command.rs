@@ -21,7 +21,19 @@ fn option_token_sections_from_field(field: &Field) -> OptionTokenSections {
         .ident
         .as_ref()
         .expect("Unnamed struct fields are not supported");
-    let option_name = field_ident.to_string();
+    let name_attr = field.attrs.iter().find(|attr| attr.path.is_ident("name"));
+    let option_name = if let Some(name_attr) = name_attr {
+        let name_meta = name_attr.parse_meta().expect("Invalid \"name\" attribute");
+        match name_meta {
+            Meta::NameValue(ref value) => match value.lit {
+                Lit::Str(ref name) => name.value(),
+                _ => panic!("Invalid \"name\" attribute"),
+            },
+            _ => panic!("Invalid \"name\" attribute"),
+        }
+    } else {
+        field_ident.to_string()
+    };
     let doc_meta = field
         .attrs
         .iter()

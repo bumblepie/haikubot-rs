@@ -21,6 +21,7 @@ pub struct TestCommand {
     /// a string option
     string_opt: String,
     /// a non-required string option
+    #[name = "non_required_string_option"]
     maybe_string_opt: Option<String>,
     /// an int option
     int_opt: i64,
